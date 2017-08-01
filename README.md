@@ -1,6 +1,6 @@
 ### This is a multi Topic/Room Chat Server created in Java
 
-The chat uses WebSockets to communicate with clients, and internally JMS is used to track the messages sent to different Chat Rooms/Topics. Anytime a user connects to a Topic/Room the receive the last 10 messages sent.
+The chat uses WebSockets to communicate with clients, and internally JMS is used to track the messages sent to different Chat Rooms/Topics. Anytime a user connects to a Topic/Room they receive the last 10 messages sent.
 
 To build the Service you must have Maven installed, and can just type:
 
