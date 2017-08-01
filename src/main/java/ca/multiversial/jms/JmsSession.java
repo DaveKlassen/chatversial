@@ -17,37 +17,32 @@ public class JmsSession {
     private static volatile JmsSession instance = null;
     private static Connection connection = null;
     private static Session session = null;
-	private static Topic topic = null;
+    private static Topic topic = null;
 
-	private JmsSession() {
+    private JmsSession() {
 
-		try {
-			ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-			connection = connectionFactory.createConnection();
-			connection.setClientID("multiTopicChat");
-			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);			
-			topic = session.createTopic("defaultTopic?consumer.retroactive=true");
+        try {
+            ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+            connection = connectionFactory.createConnection();
+            connection.setClientID("multiTopicChat");
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);            
+            topic = session.createTopic("defaultTopic?consumer.retroactive=true");
 
-			// Publish
-			String payload = "Welcome to the default Topic!";
-			/*TextMessage msg = session.createTextMessage(payload);
-			MessageProducer publisher = session.createProducer(topic);
-			System.out.println("Sending text '" + payload + "'");
-			publisher.send(msg, javax.jms.DeliveryMode.PERSISTENT, javax.jms.Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
-*/
-			ChatMessage message = new ChatMessage();
-	        message.setFrom("Admin");
-	        message.setContent("Welcome to the default Topic!");
-			
-			Message objMsg = session.createObjectMessage(message);	
-			MessageProducer publisher = session.createProducer(topic);
-			System.out.println("Sending text '" + payload + "'");
-			publisher.send(objMsg, javax.jms.DeliveryMode.PERSISTENT, javax.jms.Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
-			
-			connection.start();
-		} catch (Exception e) {
-			System.out.println(e.toString());
-		}
+            // Publish
+            String payload = "Welcome to the default Topic!";
+            ChatMessage message = new ChatMessage();
+            message.setFrom("Admin");
+            message.setContent("Welcome to the default Topic!");
+            
+            Message objMsg = session.createObjectMessage(message);  
+            MessageProducer publisher = session.createProducer(topic);
+            System.out.println("Sending text '" + payload + "'");
+            publisher.send(objMsg, javax.jms.DeliveryMode.PERSISTENT, javax.jms.Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+            
+            connection.start();
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
     }
 
     public static JmsSession getInstance() {
@@ -62,14 +57,14 @@ public class JmsSession {
     }
 
     private static Connection getConnection() {
-		return connection;
-	}
+        return connection;
+    }
     
     public static Session getSession() {
-		return session;
-	}
+        return session;
+    }
 
-	public static Topic getTopic() {
-		return topic;
-	}
+    public static Topic getTopic() {
+        return topic;
+    }
 }

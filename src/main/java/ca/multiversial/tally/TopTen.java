@@ -14,10 +14,10 @@ import ca.multiversial.websocket.ChatEndpoint;
 
 @WebServlet(urlPatterns = {"/tally/*"} )
 public class TopTen extends HttpServlet {
-	
+    
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-    	ConcurrentHashMap<String, Integer> theList = (ConcurrentHashMap) ChatEndpoint.getScores();
+        ConcurrentHashMap<String, Integer> theList = (ConcurrentHashMap) ChatEndpoint.getScores();
         try
         {
             response.setContentType("text/html");
@@ -34,10 +34,9 @@ public class TopTen extends HttpServlet {
                 out.println("<tr>");
                 out.println("<th>" + key + "</th>");
                 out.println("<th>" + theList.get(key) + "</th>");
-                out.println("</tr>");            	
-            }            
+                out.println("</tr>");
+            }
             out.println("<br/>");
-            //out.println(maxAmount.toString());
             out.println("</body>");
             out.println("</html>");
             out.flush();

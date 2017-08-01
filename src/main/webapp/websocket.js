@@ -2,10 +2,10 @@ var ws;
 
 
 function resetTextareaScrollPosition(){
-	var textarea = document.getElementById("log");
-	if(textarea.selectionStart == textarea.selectionEnd) {
-	    textarea.scrollTop = textarea.scrollHeight;
-	}
+    var textarea = document.getElementById("log");
+    if(textarea.selectionStart == textarea.selectionEnd) {
+        textarea.scrollTop = textarea.scrollHeight;
+    }
 }
 
 function connect() {
@@ -27,10 +27,10 @@ function connect() {
 }
 
 document.getElementById("username").addEventListener("keyup", function(e){
-	if (e.keyCode === 13) {
-    	// Connect to the chat service
-		connect();
-	}
+    if (e.keyCode === 13) {
+        // Connect to the chat service
+        connect();
+    }
 });
 
 
@@ -46,8 +46,8 @@ function send() {
 }
 
 document.getElementById("msg").addEventListener("keyup", function(e){
-	if (e.keyCode === 13) {
-    	// Send the message
-		send();
-	}
+    if (e.keyCode === 13) {
+        // Send the message
+        send();
+    }
 });
