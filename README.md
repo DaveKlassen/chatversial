@@ -4,14 +4,13 @@ The chat uses WebSockets to communicate with clients, and internally JMS is used
 
 To build the Service you must have Maven installed, and can just type:
 
--mvn compile jetty:run
+- mvn compile jetty:run
 
 in order to start the server. The main webApp is accessed at:
 
-http://localhost:8080
+- http://localhost:8080
 
 To create a new chat room the user must type "/Join TopicName"
-
 To see who has typed the most characters visit:
 
 - http://localhost:8080/tally
