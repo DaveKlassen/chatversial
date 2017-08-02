@@ -1,7 +1,10 @@
 package ca.multiversial.websocket;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.websocket.EncodeException;
@@ -20,8 +23,9 @@ import ca.multiversial.model.ChatMessage;
 @ServerEndpoint(value = "/chat/{username}", decoders = MessageDecoder.class, encoders = MessageEncoder.class)
 public class ChatEndpoint {
     private static ConcurrentHashMap<String, String> currentTopics = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<String, String> users = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<String, Integer> scores = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, String> users = new ConcurrentHashMap<>();
+    private static final Set<ChatEndpoint> chatEndpoints = new CopyOnWriteArraySet<>();
     private WebSocketSession webSocketSession;
     private JmsEndpoint jmsEndpoint = null;
     
@@ -37,20 +41,45 @@ public class ChatEndpoint {
         this.webSocketSession = new WebSocketSession(session);
         this.jmsEndpoint = new JmsEndpoint(username, this.webSocketSession);
         users.put(session.getId(), username);
-        
-        // Let everyone know who's here
+        chatEndpoints.add(this);
+
+        sendTopic("defaultTopic");
+        sendUserList();
+    }
+
+    private void sendTopic(String topicName) {
+
+        // Send the list of connected users to the client.
         ChatMessage message = new ChatMessage();
-        message.setFrom(username);
-        message.setContent("Connected!");
-        jmsEndpoint.send(message);
+        message.setTo("topic");
+        message.setContent(topicName);
+        webSocketSession.send(message);
+    }
+    private void sendUserList() {
+
+        // Send the list of connected users to the client.
+        ChatMessage message = new ChatMessage();
+        message.setTo("userList");
+
+        String theList = "";
+        for (Enumeration<String> e = users.elements(); e.hasMoreElements();) {
+            String username = e.nextElement();
+            theList += username + "\n";
+            System.out.println(username);
+        }
+        message.setContent(theList);
+
+        // We need to broadcast this to update all users.
+        broadcast(message);
     }
 
     private boolean isJoinRequest(String content) {
         boolean join = false;
         
         String trimmed = content.trim();
-        join = trimmed.startsWith("/Join ");
-        
+        join = trimmed.matches("(?i:[\\s]?/Join[\\s]?.*)");
+        System.out.println(join);
+
         return(join);
     }
 
@@ -64,7 +93,9 @@ public class ChatEndpoint {
         this.jmsEndpoint = null;
 
         // Create the new topic,
-        String topic = message.getContent().replaceFirst("/Join ", "");
+        String topic = message.getContent().replaceFirst("(?i:[\\s]?/Join[\\s]?)", "");
+        System.out.println(topic);
+
         String topicName = topic.trim();
         boolean newTopic = false;
         if (null == currentTopics.get(topicName)) {
@@ -72,6 +103,7 @@ public class ChatEndpoint {
             currentTopics.put(topicName, "");
         }
         jmsEndpoint = new JmsEndpoint(message.getFrom(), this.webSocketSession, topicName, newTopic);
+        sendTopic(topicName);
     }
     
     @OnMessage
@@ -100,16 +132,28 @@ public class ChatEndpoint {
 
     @OnClose
     public void onClose(Session session) throws IOException, EncodeException {
+        chatEndpoints.remove(this);
+        users.remove(session.getId() );
 
         // Send everyone a disconnect notice and close.
         ChatMessage message = new ChatMessage();
         message.setFrom(users.get(session.getId()));
         message.setContent("Disconnected!");
-        jmsEndpoint.sendAndClose(message);        
+        jmsEndpoint.sendAndClose(message);
+
+        sendUserList();
     }
 
     @OnError
     public void onError(Session session, Throwable throwable) {
         // Do error handling here
     }
+
+    private static void broadcast(ChatMessage message) {
+        chatEndpoints.forEach(endpoint -> {
+            synchronized (endpoint) {
+                endpoint.webSocketSession.send(message);
+            }
+        });
+    }    
 }

@@ -55,7 +55,7 @@ public class JmsEndpoint {
                 // Send the first message for this topic
                 message.setContent("Welcomes you to: " + topicName);                
             } else {
-                message.setContent(userName + " has joined: " + topicName);
+                message.setContent("has joined: " + topicName);
             }
             Message objMsg = session.createObjectMessage(message);  
             publisher.send(objMsg, javax.jms.DeliveryMode.PERSISTENT, javax.jms.Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);

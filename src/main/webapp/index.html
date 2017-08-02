@@ -1,14 +1,23 @@
 <html>
     <head>
         <title>Chat</title>
-    </head>
+
+        <!-- The main style for this site -->
+        <link href="style.css" rel="stylesheet" type="text/css" />
+    </head>    
     <body>
 
-        <table>
+        <table id="ChatWindow">
             <tr>
                 <td colspan="2">
+                    <div id="TopicTitle">
+                        <div id="TopicHeader"></div>
+                        <div id="TopicName"></div>
+                    </div>                    
+                    <div class="listContainer">
                     <input type="text" id="username" placeholder="Username"/>
-                    <button type="button" onclick="connect();" >Connect</button>
+                    <input type="button" id="connectButton" value="Join" onclick="connect();" />
+                    </div>
                 </td>
             </tr>
             <tr>
@@ -22,9 +31,18 @@
                     <button type="button" onclick="send();" >Send</button>
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <label id="status" />
+                    <label id="error" />
+                </td>
+            </tr>            
         </table>
+        <div class="listContainer">
+            <div id="ListHeader"></div>
+            <div></div>
+            <div id="UserList"></div>
+        </div>
     </body>
-
     <script src="websocket.js"></script>
-
 </html>
