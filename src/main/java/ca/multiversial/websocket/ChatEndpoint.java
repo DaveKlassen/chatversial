@@ -37,6 +37,9 @@ public class ChatEndpoint {
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String username) throws IOException, EncodeException {
 
+        // Tell everyone we have a new user joining
+        broadcastUserAdded(username, "defaultTopic");
+
         // Create a Jms client for the web socket to send/receive from.
         this.webSocketSession = new WebSocketSession(session);
         this.jmsEndpoint = new JmsEndpoint(username, this.webSocketSession);
@@ -47,6 +50,24 @@ public class ChatEndpoint {
         sendUserList();
     }
 
+    private void broadcastUserAdded(String username, String topic) {
+
+        // Send the list of connected users to the client.
+        ChatMessage message = new ChatMessage();
+        message.setFrom(topic);
+        message.setTo("addUser");
+        message.setContent(username);
+        broadcast(message);
+    }
+    private void broadcastUserRemoved(String username, String topic) {
+
+        // Send the list of connected users to the client.
+        ChatMessage message = new ChatMessage();
+        message.setFrom(topic);
+        message.setTo("removeUser");
+        message.setContent(username);
+        broadcast(message);
+    }
     private void sendTopic(String topicName) {
 
         // Send the list of connected users to the client.
@@ -70,7 +91,7 @@ public class ChatEndpoint {
         message.setContent(theList);
 
         // We need to broadcast this to update all users.
-        broadcast(message);
+        webSocketSession.send(message);
     }
 
     private boolean isJoinRequest(String content) {
@@ -132,16 +153,15 @@ public class ChatEndpoint {
 
     @OnClose
     public void onClose(Session session) throws IOException, EncodeException {
+
+        // Remove user from lists
+        String username = users.get(session.getId());
+        jmsEndpoint.close();
         chatEndpoints.remove(this);
         users.remove(session.getId() );
 
-        // Send everyone a disconnect notice and close.
-        ChatMessage message = new ChatMessage();
-        message.setFrom(users.get(session.getId()));
-        message.setContent("Disconnected!");
-        jmsEndpoint.sendAndClose(message);
-
-        sendUserList();
+        // Tell everyone else they left.
+        broadcastUserRemoved(username, "notSure");
     }
 
     @OnError
