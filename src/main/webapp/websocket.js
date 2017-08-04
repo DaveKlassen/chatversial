@@ -1,6 +1,7 @@
 var initiatedConnect = false;
 var isConnected = false;
 var loginName;
+var userList = [];
 var ws;
 
 document.getElementById("username").focus();
@@ -12,11 +13,23 @@ function resetTextareaScrollPosition(){
     }
 }
 
+function removeChatMessages() {
+    var logEl = document.getElementById("log");
+    while (logEl.hasChildNodes()) {
+       logEl.removeChild(logEl.firstChild);
+    }
+}
 function removeUsersList() {
     var listEl = document.getElementById("UserList");
     while (listEl.hasChildNodes()) {
        listEl.removeChild(listEl.firstChild);
-    }  
+    }
+}
+function setOffline() {
+
+    var titleEl = document.getElementById("ListHeader");
+    titleEl.removeChild(titleEl.firstChild);
+    titleEl.innerHTML = "Offline";
 }
 function initiateDisconnect() {
     initiatedConnect = false;
@@ -24,10 +37,9 @@ function initiateDisconnect() {
     if (ws) {
         ws.close(1000, "Manual Disconnect");
 
-        var titleEl = document.getElementById("ListHeader");
-        titleEl.removeChild(titleEl.firstChild);
-        titleEl.innerHTML = "Offline";
+        setOffline();
         removeUsersList();
+        removeChatMessages();
     }
 }
 
@@ -57,6 +69,7 @@ function signalLiveConnection () {
 function signalDeadConnection () {
 
     // SignalConnectionLoss
+    userList = [];
     isConnected = false;
     document.getElementById("connectButton").value = "Join";
     document.getElementById("username").focus();
@@ -77,11 +90,7 @@ function initiateConnection(username) {
 
         // Only send this when the user manuall connects
         if (!initiatedConnect) {
-            var json = JSON.stringify({
-                "content": statusMsg
-            });
 
-            ws.send(json);
             initiatedConnect = true;
         }
     }
@@ -94,29 +103,69 @@ function initiateConnection(username) {
 
         console.log(event.data);
         var message = JSON.parse(event.data);
-        if (message.from) {
-            var logEl = document.getElementById("log");
-            logEl.innerHTML += message.from + " : " + message.content + "\n";
-        } else if (message.to) {
+        if (message.to) {
 
-            if (message.to === "userList") {
+            if (message.to === "addUser") {
+
+                // We should actual filter users based on topic...
+                removeUsersList();
+                var listEl = document.getElementById("UserList");
+                for (i in userList) {
+                    listEl.innerHTML += userList[i] + "<br/>";
+                }
+
+                // Make the new username bold.
+                listEl.innerHTML += "<b>" + message.content + "</b><br/>";
+                userList.push(message.content);
+
+                // Alter the display to signal a new user has joined a topic.
+                var logEl = document.getElementById("log");
+                logEl.innerHTML += message.content + " has joined " + message.from + "\n";
+            } else if (message.to === "removeUser") {
+
+                // We should actual filter users based on topic...
+                removeUsersList();
+                var listEl = document.getElementById("UserList");
+                for (i in userList) {
+                    if (userList[i] === message.content) {
+                        userList.splice(i, 1);
+                    } else {
+                        listEl.innerHTML += userList[i] + "<br/>";
+                    }
+                }
+
+                // Alter the display to signal a new user has joined a topic.
+                var logEl = document.getElementById("log");
+                logEl.innerHTML += message.content + " has left topic: " + message.from + "\n";
+            } else if (message.to === "userList") {
                 document.getElementById("ListHeader").innerHTML = "Online";
 
                 removeUsersList();
                 var listEl = document.getElementById("UserList");
-                var userList = message.content.split("\n");                
-                for (i in userList) {
-                    listEl.innerHTML += userList[i] + "<br/>";
+                var users = message.content.split("\n");
+                for (i in users) {
+
+                    if (users[i] !== "") {
+                        listEl.innerHTML += users[i] + "<br/>";
+                        userList.push(users[i]);
+                    }
                 }
             } else if (message.to === "topic") {
                 document.getElementById("TopicHeader").innerHTML = "Topic: ";
                 document.getElementById("TopicName").innerHTML = message.content;
             }            
+        } else if (message.from) {
+            var logEl = document.getElementById("log");
+            logEl.innerHTML += message.from + " : " + message.content + "\n";
         }
         
         resetTextareaScrollPosition();
     };
     ws.onclose = function(event) {
+
+        // If we recieve the disconnect from the server...
+        setOffline();
+        removeUsersList();
         signalDeadConnection();
 
         var statusEl = document.getElementById("status");
