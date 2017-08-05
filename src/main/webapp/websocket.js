@@ -1,7 +1,8 @@
 var initiatedConnect = false;
 var isConnected = false;
-var loginName;
+var heartBeatTimerId;
 var userList = [];
+var loginName;
 var ws;
 
 document.getElementById("username").focus();
@@ -92,6 +93,14 @@ function initiateConnection(username) {
         if (!initiatedConnect) {
 
             initiatedConnect = true;
+            heartBeatTimerId = setInterval( function() {
+                var json = JSON.stringify({
+                    "to": "heartbeat",
+                    "content": "alive " + userList.length
+                });
+
+                ws.send(json);
+            }, 60000);
         }
     }
     ws.onerror = function(event) {
@@ -105,7 +114,9 @@ function initiateConnection(username) {
         var message = JSON.parse(event.data);
         if (message.to) {
 
-            if (message.to === "addUser") {
+            if (message.to === "heartbeat") {
+                console.log("Sever is alive: " + message.content);
+            } else if (message.to === "addUser") {
 
                 // We should actual filter users based on topic...
                 removeUsersList();
@@ -163,6 +174,9 @@ function initiateConnection(username) {
     };
     ws.onclose = function(event) {
 
+        // Remove the heartbeat message.
+        clearInterval(heartBeatTimerId);
+
         // If we recieve the disconnect from the server...
         setOffline();
         removeUsersList();
@@ -190,6 +204,7 @@ function send() {
     ws.send(json);
     
     document.getElementById("msg").value = "";
+    console.log(content);
 }
 
 document.getElementById("msg").addEventListener("keyup", function(e){

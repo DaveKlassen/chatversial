@@ -99,7 +99,6 @@ public class ChatEndpoint {
         
         String trimmed = content.trim();
         join = trimmed.matches("(?i:[\\s]?/Join[\\s]?.*)");
-        System.out.println(join);
 
         return(join);
     }
@@ -131,11 +130,16 @@ public class ChatEndpoint {
     public void onMessage(Session session, ChatMessage message) throws IOException, EncodeException {
         String userId = users.get(session.getId());
         message.setFrom(userId);
+        String to = message.getTo();
         
         if (isJoinRequest(message.getContent()) ) {
             processJoinRequest(message);            
+        } else if ( (to != null) && (to.equals("heartbeat")) ) {
+            message.setFrom("Admin");
+            message.setContent("Alive " + users.size());
+            webSocketSession.send(message);
         } else {
-             
+
             jmsEndpoint.send(message);
             
             // Score the message
