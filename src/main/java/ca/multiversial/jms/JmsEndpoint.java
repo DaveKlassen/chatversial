@@ -5,7 +5,6 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
-import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 import ca.multiversial.model.ChatMessage;
@@ -13,7 +12,7 @@ import ca.multiversial.websocket.WebSocketSession;
 
 
 public class JmsEndpoint {
-    private JmsSession jmsSession = null; 
+    //private JmsSession jmsSession = JmsSession.getInstance();
     private MessageConsumer consumer = null;
     private MessageProducer publisher = null;
     private Topic topic = null;
@@ -21,13 +20,12 @@ public class JmsEndpoint {
     public JmsEndpoint(String userName, WebSocketSession webSocketSession) {
 
         try {
-            jmsSession = JmsSession.getInstance();
-            Session session = jmsSession.getSession();
-            topic = jmsSession.getTopic();
+            Session session = JmsSession.getSession();
+            topic = JmsSession.getTopic();
             
             // Create consumer and publisher handles.
             userName = userName + System.currentTimeMillis();
-            consumer = session.createConsumer(jmsSession.getTopic() );
+            consumer = session.createConsumer(JmsSession.getTopic() );
             consumer.setMessageListener(new JmsMessageListener(userName, webSocketSession));
             publisher = session.createProducer(topic);
         } catch (Exception e) {
@@ -38,8 +36,7 @@ public class JmsEndpoint {
     public JmsEndpoint(String userName, WebSocketSession webSocketSession, String topicName, boolean first) {
 
         try {
-            jmsSession = JmsSession.getInstance();
-            Session session = jmsSession.getSession();
+            Session session = JmsSession.getSession();
             topic = session.createTopic(topicName + "?consumer.retroactive=true");
             
             // Create consumer and publisher handles.
@@ -71,7 +68,7 @@ public class JmsEndpoint {
         try {
             
             // Serialize the ChatMessage to Jms.
-            Message objMsg = jmsSession.getSession().createObjectMessage(chatMessage);
+            Message objMsg = JmsSession.getSession().createObjectMessage(chatMessage);
             publisher.send(objMsg, javax.jms.DeliveryMode.PERSISTENT, javax.jms.Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
         } catch (Exception e) {
             System.out.println(e.toString());

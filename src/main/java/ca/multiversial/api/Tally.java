@@ -1,4 +1,4 @@
-package ca.multiversial.tally;
+package ca.multiversial.api;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,18 +13,18 @@ import javax.servlet.http.HttpServletResponse;
 import ca.multiversial.websocket.ChatEndpoint;
 
 @WebServlet(urlPatterns = {"/tally/*"} )
-public class TopTen extends HttpServlet {
+public class Tally extends HttpServlet {
     
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        ConcurrentHashMap<String, Integer> theList = (ConcurrentHashMap) ChatEndpoint.getScores();
+        ConcurrentHashMap<String, Integer> theList = (ConcurrentHashMap<String, Integer>) ChatEndpoint.getScores();
         try
         {
             response.setContentType("text/html");
             ServletOutputStream out = response.getOutputStream();
             out.println("<html>");
             out.println("<body>");
-            out.println("<h1>Top Ten</h1>");
+            out.println("<h1>Tally</h1>");
             out.println("<table>");
             out.println("<tr>");
             out.println("<th>Name</th>");

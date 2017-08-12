@@ -1,9 +1,138 @@
 var initiatedConnect = false;
 var isConnected = false;
 var heartBeatTimerId;
+var topicList = [];
 var userList = [];
 var loginName;
 var ws;
+
+
+function getXmlHttpRequestObject() {
+
+	if (typeof(XMLHttpRequest) == "undefined") 	{
+
+		XMLHttpRequest = function() {
+			try {
+				return new ActiveXObject("Msxml2.XMLHTTP.6.0");
+			} catch(e) {} try {
+				return new ActiveXObject("Msxml2.XMLHTTP.3.0");
+			} catch(e) {} try {
+				return new ActiveXObject("Msxml2.XMLHTTP");
+			} catch(e) {} try {
+				return new ActiveXObject("Microsoft.XMLHTTP");
+			} catch(e) {}
+			alert("get a new browser");
+			throw new Error("This browser does not support XMLHttpRequest.");
+		};
+	}
+
+    var req = new XMLHttpRequest();
+	return(req);
+}
+
+function processChatTopics(req) {
+
+	// If the request state had data to process.
+	if (req.readyState == 4) {
+
+		// If the request status is 'OK'
+		if (req.status == 200) {
+            console.log(req.response);
+            topicList = JSON.parse(req.response);
+
+            // Make the first topic the default login entry
+            var e = document.getElementById("TopicName");
+            e.value = topicList[0];
+		} else {
+
+			// Display error status.
+			alert("Error Status Code: " + req.status);
+		}
+	}
+}
+
+// 1. to handle the GET AJAX call.
+function getChatTopics() {
+	var url = "/topics/?time=" + new Date().getTime();
+	var req = getXmlHttpRequestObject();
+
+	// Open the request
+	req.open("GET", url, true);
+
+	// Set the request processing function
+	req.onreadystatechange=function() { processChatTopics(req) };
+
+	// Send the Request
+	req.send(null);
+}
+
+/* Add a hint below the email field for the user to select. */
+var myAddHintFunction = function (email) {
+
+    // Create the hint
+    var y = document.createElement("div");
+    var textnode = document.createTextNode(email);
+    y.appendChild(textnode);
+    y.className = "hint";
+
+    // If the hint is clicked
+    y.addEventListener("click", function(emailField) {
+
+        // Change the email input element
+        var data = y.childNodes[0].nodeValue;
+        var e = document.getElementById("TopicName");
+        e.value = data;
+
+        // Remove the drop down hints.
+        var z = document.getElementById("HintList").parentElement;
+        var x = document.getElementById("HintList");
+        z.removeChild(x);
+    });
+
+    return(y);
+};
+
+function searchHints() {
+
+    // Get the hint list if it exists
+    var x = document.getElementById("HintList");
+    if ( (x === undefined) || (x === null) ) {
+
+        // Create the hint div
+        var div = document.createElement("div");
+        div.id = "HintList";
+
+        for (var i = 0; i < topicList.length; i++) {
+
+            // Add this contact to the hint list.
+            var newHint = myAddHintFunction(topicList[i]);
+            div.appendChild(newHint);
+        }
+
+        // Append it to the parent input field.
+        var e = document.getElementById("TopicDropdown");
+        e.appendChild(div);
+    } else {
+        // Remove the drop down hints.
+        var z = document.getElementById("HintList").parentElement;
+        z.removeChild(x);
+    }
+};
+
+window.onload = function() {
+    getChatTopics();
+};
+function addTopicToList(topic) {
+    var found = false;
+    for (var i = 0; i < topicList.length; i++) {
+        if (topic === topicList[i]) {
+            found = true;
+        }
+    }
+    if (!found) {
+        topicList.push(topic);
+    }
+}
 
 document.getElementById("username").focus();
 
@@ -63,6 +192,8 @@ function signalLiveConnection () {
 
     // Signal Live Connection
     isConnected = true;
+    document.getElementById("TopicName").disabled = true;
+    document.getElementById("TopicButton").onclick = function() {};
     document.getElementById("connectButton").value = "Leave";        
     document.getElementById("msg").focus();
 }
@@ -72,6 +203,8 @@ function signalDeadConnection () {
     // SignalConnectionLoss
     userList = [];
     isConnected = false;
+    document.getElementById("TopicName").disabled = false;
+    document.getElementById("TopicButton").onclick = searchHints;
     document.getElementById("connectButton").value = "Join";
     document.getElementById("username").focus();
 }
@@ -80,8 +213,9 @@ function initiateConnection(username) {
     
     var host = document.location.host;
     var pathname = document.location.pathname;
+    var topic = document.getElementById("TopicName").value;
     
-    ws = new WebSocket("ws://" +host  + pathname + "chat/" + username);
+    ws = new WebSocket("ws://" +host  + pathname + "chat/" + topic + "/" + username);
     ws.onopen = function(event) {
         signalLiveConnection();
 
@@ -162,8 +296,13 @@ function initiateConnection(username) {
                     }
                 }
             } else if (message.to === "topic") {
-                document.getElementById("TopicHeader").innerHTML = "Topic: ";
-                document.getElementById("TopicName").innerHTML = message.content;
+                // If we have joined a new topic, clear the chat log.
+                removeChatMessages();
+
+                //document.getElementById("TopicHeader").innerHTML = "Topic: ";
+                var e = document.getElementById("TopicName");
+                e.value = message.content;
+                addTopicToList(message.content);
             }            
         } else if (message.from) {
             var logEl = document.getElementById("log");

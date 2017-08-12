@@ -4,9 +4,7 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
-import javax.jms.ObjectMessage;
 import javax.jms.Session;
-import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -15,6 +13,7 @@ import ca.multiversial.model.ChatMessage;
 
 public class JmsSession {
     private static volatile JmsSession instance = null;
+    public static final String DEFAULT_TOPIC = "defaultTopic";
     private static Connection connection = null;
     private static Session session = null;
     private static Topic topic = null;
@@ -26,7 +25,7 @@ public class JmsSession {
             connection = connectionFactory.createConnection();
             connection.setClientID("multiTopicChat");
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);            
-            topic = session.createTopic("defaultTopic?consumer.retroactive=true");
+            topic = session.createTopic(DEFAULT_TOPIC + "?consumer.retroactive=true");
 
             // Publish
             String payload = "Welcome to the default Topic!";

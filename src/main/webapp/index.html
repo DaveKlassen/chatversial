@@ -10,13 +10,14 @@
         <table id="ChatWindow">
             <tr>
                 <td colspan="2">
-                    <div id="TopicTitle">
-                        <div id="TopicHeader"></div>
-                        <div id="TopicName"></div>
-                    </div>                    
+                    <div id="TopicHeader">Topic: </div>
+                    <div id="TopicDropdown" class="editableDropdown">
+                        <input id="TopicName" type="email"  name="email" />
+                        <div id="TopicButton" class="divButton" onClick="searchHints()">&nbsp;</div>
+                    </div>
                     <div class="listContainer">
-                    <input type="text" id="username" placeholder="Username"/>
-                    <input type="button" id="connectButton" value="Join" onclick="connect();" />
+                        <input type="text" id="username" placeholder="Username"/>
+                        <input type="button" id="connectButton" value="Join" onclick="connect();" />
                     </div>
                 </td>
             </tr>

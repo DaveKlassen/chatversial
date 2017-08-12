@@ -11,13 +11,54 @@ body {
     color: #d9d9d9;
 }
 
+.editableDropdown {
+    margin: 3px 3px;
+}
+#TopicName {
+    width: 280px;
+}
+/* https://stackoverflow.com/questions/23608346/how-to-style-a-div-like-the-button-element */
+.divButton {
+    padding: 2px 6px;
+    border: solid #707070 1px;
+    font-family: caption;
+    font-size: 14px;
+    background: grey;
+    display: inline;
+    border-radius: 2px;
+    background-image: -webkit-gradient(linear,left top, left bottom, color-stop(0, #F2F2F2), color-stop(1, #CFCFCF));
+    background-image: -o-linear-gradient(bottom, #F2F2F2 0%, #CFCFCF 100%);
+    background-image: -moz-linear-gradient(bottom, #F2F2F2 0%, #CFCFCF 100%);
+    background-image: -webkit-linear-gradient(bottom, #F2F2F2 0%, #CFCFCF 100%);
+    background-image: -ms-linear-gradient(bottom, #F2F2F2 0%, #CFCFCF 100%);
+    background-image: linear-gradient(to bottom, #F2F2F2 0%, #CFCFCF 100%);
+    cursor: default;
+    text-align: center;
+}
+#HintList {
+    position: absolute;
+    width: 278px;
+    margin-left: 49px;
+    text-indent: 10px;
+    font-size: 0.80em;
+    border: 1px solid #CCC;
+    border-top: none;
+    background-color: white;
+    font-weight: 500;
+    z-index: 1;
+}
+#HintList div:hover {
+    font-weight: bold;
+    background-color: #cce7ff;
+}
+
 p {
     text-align: left;
 }
 #ChatWindow {
     display: inline;
 }
-#TopicTitle {
+#TopicDropdown {
     display: inline;
 }
 .listContainer {
@@ -28,8 +69,8 @@ p {
     display: inline;
 }
 #TopicName {
-    color: white;
-    display: inline;    
+    display: inline;
+    width: 280px;
 }
 #ListHeader {    
     color: white;
@@ -43,7 +84,7 @@ p {
 }
 
 #msg {
-    width: 542px;
+    width: 549px;
 }
 .button {
     display: inline;

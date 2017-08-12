@@ -17,37 +17,59 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
 import ca.multiversial.jms.JmsEndpoint;
+import ca.multiversial.jms.JmsSession;
 import ca.multiversial.model.ChatMessage;
 
 
-@ServerEndpoint(value = "/chat/{username}", decoders = MessageDecoder.class, encoders = MessageEncoder.class)
+@ServerEndpoint(value = "/chat/{topic}/{username}", decoders = MessageDecoder.class, encoders = MessageEncoder.class)
 public class ChatEndpoint {
-    private static ConcurrentHashMap<String, String> currentTopics = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<String, Integer> scores = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<String, String> users = new ConcurrentHashMap<>();
     private static final Set<ChatEndpoint> chatEndpoints = new CopyOnWriteArraySet<>();
+    private static Set<String> currentTopics = new CopyOnWriteArraySet<>();
     private WebSocketSession webSocketSession;
     private JmsEndpoint jmsEndpoint = null;
-    
+
     public static Map<String, Integer> getScores() {
         Map<String, Integer> copyOfScores = new ConcurrentHashMap<>(scores);
         return(copyOfScores);
     }
+    public static Set<String> getTopics() {
+
+        // If default topic not in list add it.
+        if (false == currentTopics.contains(JmsSession.DEFAULT_TOPIC)) {
+	        currentTopics.add(JmsSession.DEFAULT_TOPIC);
+        }
+
+        Set<String> copyOfTopics = new CopyOnWriteArraySet<>(currentTopics);
+        return(copyOfTopics);
+    }
     
     @OnOpen
-    public void onOpen(Session session, @PathParam("username") String username) throws IOException, EncodeException {
+    public void onOpen(Session session,
+                       @PathParam("topic") String topic,
+                       @PathParam("username") String username) throws IOException, EncodeException {
 
         // Tell everyone we have a new user joining
-        broadcastUserAdded(username, "defaultTopic");
+        String topicName = topic.trim();
+        broadcastUserAdded(username, topicName);
+
+        // Send admin info to client.
+        this.webSocketSession = new WebSocketSession(session);
+        sendTopic(topicName);
+        sendUserList();
+
+        // Check if the JMS topic is new.
+        boolean newTopic = false;
+        if (false == currentTopics.contains(topicName)) {
+            newTopic = true;
+            currentTopics.add(topicName);
+        }
 
         // Create a Jms client for the web socket to send/receive from.
-        this.webSocketSession = new WebSocketSession(session);
-        this.jmsEndpoint = new JmsEndpoint(username, this.webSocketSession);
+        this.jmsEndpoint = new JmsEndpoint(username, this.webSocketSession, topicName, newTopic);
         users.put(session.getId(), username);
         chatEndpoints.add(this);
-
-        sendTopic("defaultTopic");
-        sendUserList();
     }
 
     private void broadcastUserAdded(String username, String topic) {
@@ -112,18 +134,18 @@ public class ChatEndpoint {
         this.jmsEndpoint.sendAndClose(byeMessage);
         this.jmsEndpoint = null;
 
-        // Create the new topic,
+        // Declare the new topic.
         String topic = message.getContent().replaceFirst("(?i:[\\s]?/Join[\\s]?)", "");
-        System.out.println(topic);
-
         String topicName = topic.trim();
+        sendTopic(topicName);
+
+        // Create the new topic.
         boolean newTopic = false;
-        if (null == currentTopics.get(topicName)) {
+        if (false == currentTopics.contains(topicName)) {
             newTopic = true;
-            currentTopics.put(topicName, "");
+            currentTopics.add(topicName);
         }
         jmsEndpoint = new JmsEndpoint(message.getFrom(), this.webSocketSession, topicName, newTopic);
-        sendTopic(topicName);
     }
     
     @OnMessage
