@@ -84,13 +84,7 @@ stage('Next') {
           description: 'A select box option'
         ]
       ]
-    }
-    
-  }
-}
-stage('Istuary') {
-  steps {
-    script {
+      
       echo "P1: ${outcome.get('Run test suites?')}"
       echo "P2: ${outcome.get('Enter some text')}"
       echo "P3: ${outcome.get('Enter a password')}"
