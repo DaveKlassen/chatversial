@@ -28,6 +28,8 @@ pipeline {
             }
           } catch(err) { // timeout reached or input false
           def user = err.getCauses()[0].getUser()
+          echo "User: [${user}]"
+          
           if('SYSTEM' == user.toString()) { // SYSTEM means timeout.
           didTimeout = true
         } else {
@@ -35,6 +37,8 @@ pipeline {
           echo "Aborted by: [${user}]"
         }
       }
+      echo "userInput [${userInput}]"
+      echo "didTimeout [${didTimeout}]"
       
       if (userInput == true) {
         sh 'echo \'Deploying...\''
