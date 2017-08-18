@@ -23,7 +23,7 @@ pipeline {
             timeout(time: 120, unit: 'SECONDS') { // change to a convenient timeout for you
             userInput = input(
               id: 'Deploy1', message: 'Would you like to deploy this to production?', parameters: [
-                [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Someone must approve production deployments', name: 'Please indicate your decision.']
+                [$class: 'BooleanParameterDefinition', defaultValue: true, description: 'Someone must approve production deployments', name: 'Please indicate your decision.']
               ])
             }
           } catch(err) { // timeout reached or input false
