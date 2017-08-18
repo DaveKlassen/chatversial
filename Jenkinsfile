@@ -37,6 +37,8 @@ pipeline {
           echo "Aborted by: [${user}]"
         }
       }
+      def user = err.getCauses()[0].getUser()
+      echo "User: [${user}]"
       echo "userInput [${userInput}]"
       echo "didTimeout [${didTimeout}]"
       
@@ -49,6 +51,8 @@ pipeline {
         echo "A user decided not to deploy to production."
         currentBuild.result = 'ABORTED'
       }
+      
+      echo "Build Result : [${currentBuild}]"
     }
     
   }
