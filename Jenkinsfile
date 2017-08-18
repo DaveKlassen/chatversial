@@ -56,7 +56,6 @@ pipeline {
 stage('Next') {
   steps {
     script {
-      // Define an input step and capture the outcome from it.
       def outcome = input id: 'Run-test-suites',
       message: 'Workflow Configuration',
       ok: 'Okay',
@@ -87,9 +86,11 @@ stage('Next') {
       ]
     }
     
+  }
+}
+stage('Istuary') {
+  steps {
     script {
-      // Echo the outcome values so they can be checked fro in the test. This will help
-      // verify that input submit/proceed worked properly.
       echo "P1: ${outcome.get('Run test suites?')}"
       echo "P2: ${outcome.get('Enter some text')}"
       echo "P3: ${outcome.get('Enter a password')}"
