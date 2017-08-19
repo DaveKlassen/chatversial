@@ -50,7 +50,7 @@ pipeline {
         currentBuild.result = 'ABORTED'
       }
       
-      echo "Build Result : [${currentBuild.toString()}]"
+      echo "Build Result : [${currentBuild.result.toString()}]"
     }
     
   }
