@@ -42,6 +42,7 @@ pipeline {
       
       if (userInput == true) {
         sh 'echo \'Deploying...\''
+        currentBuild.result = 'SUCCESS'
       } else if (didTimeout) {
         echo "No decision making input was received before timeout."
         currentBuild.result = 'NOT_BUILT'
