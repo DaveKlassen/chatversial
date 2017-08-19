@@ -120,8 +120,9 @@ stage('Last') {
     script {
       def userInput = true
       def didTimeout = false
+      def timer = "was"
       try {
-        waitUntil(timeout(time: 20, unit: 'SECONDS') { // change to a convenient timeout for you
+        waitUntil(timer = timeout(time: 20, unit: 'SECONDS') { // change to a convenient timeout for you
         userInput = input(
           id: 'DeployToProd',
           message: 'Would you like to deploy this to production?',
@@ -143,6 +144,7 @@ stage('Last') {
     echo "Aborted by: [${user}]"
   }
 }
+echo "timer [${timer}]"
 echo "userInput [${userInput}]"
 echo "didTimeout [${didTimeout}]"
 
