@@ -163,6 +163,10 @@ if (userInput == "Deploy") {
 echo "Build Result : [${currentBuild.result.toString()}]"
 }
 
+waitUntil() {
+sh 'echo \'Hello\''
+}
+
 }
 }
 }
