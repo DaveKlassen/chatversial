@@ -121,7 +121,7 @@ stage('Last') {
       def userInput = true
       def didTimeout = false
       try {
-        timeout(time: 20, unit: 'SECONDS') { // change to a convenient timeout for you
+        waitUntil(timeout(time: 20, unit: 'SECONDS') { // change to a convenient timeout for you
         userInput = input(
           id: 'DeployToProd',
           message: 'Would you like to deploy this to production?',
@@ -130,7 +130,7 @@ stage('Last') {
             [$class: 'ChoiceParameterDefinition', choices: 'Deploy\nAbort\nUndecided', name: 'Please indicate your decision.', description: 'Someone must approve production deployments']
           ]
         )
-      }
+      })
     } catch(err) { // timeout reached or input false
     def user = err.getCauses()[0].getUser()
     echo "User: [${user}]"
@@ -161,10 +161,6 @@ if (userInput == "Deploy") {
 }
 
 echo "Build Result : [${currentBuild.result.toString()}]"
-}
-
-waitUntil() {
-sh 'echo \'Hello\''
 }
 
 }
