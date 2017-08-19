@@ -127,7 +127,7 @@ stage('Last') {
           message: 'Would you like to deploy this to production?',
           ok: 'Deploy',
           parameters: [
-            [$class: 'ChoiceParameterDefinition', choices: 'Deploy\nDo Not Deploy\nUndecided', name: 'Please indicate your decision.', description: 'Someone must approve production deployments']
+            [$class: 'ChoiceParameterDefinition', choices: 'Deploy\nAbort\nUndecided', name: 'Please indicate your decision.', description: 'Someone must approve production deployments']
           ]
         )
       }
@@ -147,16 +147,16 @@ echo "didTimeout [${didTimeout}]"
 
 if (userInput == "Deploy") {
   sh 'echo \'Deploying...\''
-} else if (userInput == "Do Not Deploy") {
-  echo "The user decided to abort deployment."
-  currentBuild.result = 'NOT_BUILT'
+} else if (userInput == "Abort") {
+  echo "The user decided to abort deployment..."
+  currentBuild.result = 'ABORTED'
   
 } else if (userInput == "Undecided") {
-  echo "A user was undecided about deploying to production."
-  currentBuild.result = 'UNSTABLE'
+  echo "A user was undecided about a production deployment."
+  currentBuild.result = 'NOT_BUILT'
 } else {
-  echo "Aborted at deploy to production."
-  currentBuild.result = 'ABORTED'
+  echo "Timed out at deploy decision."
+  currentBuild.result = 'UNSTABLE'
 }
 
 echo "Build Result : [${currentBuild.result.toString()}]"
