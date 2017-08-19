@@ -103,21 +103,12 @@ stage('Finally') {
       ok: 'Okay',
       parameters: [
         [
-          $class: 'BooleanParameterDefinition',
-          defaultValue: true,
-          name: 'Run test suites?',
-          description: 'A checkbox option'
-        ],
-        [
-          $class: 'ChoiceParameterDefinition', choices: 'Deploy\nAbort 2\nUndecided',
+          $class: 'ChoiceParameterDefinition', choices: 'Deploy\nAbort\nUndecided',
           name: 'Decision',
           description: 'A select box option'
         ]
       ]
       
-      echo "P1: ${outcome2.get('Run test suites?')}"
-      echo "P2: ${outcome2.get('Enter some text')}"
-      echo "P3: ${outcome2.get('Enter a password')}"
       echo "P4: ${outcome2.get('Decision')}"
     }
     
