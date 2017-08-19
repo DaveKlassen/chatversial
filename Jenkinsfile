@@ -98,7 +98,7 @@ stage('Next') {
 stage('Finally') {
   steps {
     script {
-      def outcome2 = input id: 'Run-test-suites',
+      def outcome3 = input id: 'Run-test-suites',
       message: 'Workflow Configuration',
       ok: 'Okay',
       parameters: [
@@ -109,7 +109,7 @@ stage('Finally') {
         ]
       ]
       
-      echo "P4: ${outcome2.get('Decision')}"
+      echo "P4: ${outcome3.get('Decision')}"
     }
     
   }
