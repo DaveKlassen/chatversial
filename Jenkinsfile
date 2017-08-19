@@ -109,7 +109,7 @@ stage('Finally') {
         ]
       ]
       
-      echo "P4: ${outcome3.get('Decision')}"
+      echo "P4: ${outcome3}"
     }
     
   }
