@@ -131,35 +131,36 @@ stage('Last') {
             [$class: 'ChoiceParameterDefinition', choices: 'Deploy\nAbort\nUndecided', name: 'Please indicate your decision.', description: 'Someone must approve production deployments']
           ]
         )
-      })
-    } catch(err) { // timeout reached or input false
-    def user = err.getCauses()[0].getUser()
-    echo "User: [${user}]"
-    didTimeout = true
-    currentBuild.result = 'UNSTABLE'
-    if('SYSTEM' == user.toString()) { // SYSTEM means timeout.
-    didTimeout = true
-  } else {
-    userInput = false
-    echo "Aborted by: [${user}]"
-  }
+      }
+      echo "timer [${timer}]"
+    )
+  } catch(err) { // timeout reached or input false
+  def user = err.getCauses()[0].getUser()
+  echo "User: [${user}]"
+  didTimeout = true
+  currentBuild.result = 'UNSTABLE'
+  if('SYSTEM' == user.toString()) { // SYSTEM means timeout.
+  didTimeout = true
+} else {
+  userInput = false
+  echo "Aborted by: [${user}]"
 }
-echo "timer [${timer}]"
+}
 echo "userInput [${userInput}]"
 echo "didTimeout [${didTimeout}]"
 
 if (userInput == "Deploy") {
-  sh 'echo \'Deploying...\''
+sh 'echo \'Deploying...\''
 } else if (userInput == "Abort") {
-  echo "The user decided to abort deployment..."
-  currentBuild.result = 'ABORTED'
-  
+echo "The user decided to abort deployment..."
+currentBuild.result = 'ABORTED'
+
 } else if (userInput == "Undecided") {
-  echo "A user was undecided about a production deployment."
-  currentBuild.result = 'NOT_BUILT'
+echo "A user was undecided about a production deployment."
+currentBuild.result = 'NOT_BUILT'
 } else {
-  echo "Timed out at deploy decision."
-  currentBuild.result = 'UNSTABLE'
+echo "Timed out at deploy decision."
+currentBuild.result = 'UNSTABLE'
 }
 
 echo "Build Result : [${currentBuild.result.toString()}]"
