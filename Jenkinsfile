@@ -136,16 +136,17 @@ stage('Last') {
           echo "timer [${timer}]"
         )
       } catch(err) { // timeout reached or input false
-        def user = err.getCauses()[0].getUser()
-        echo "User: [${user}]"
+        echo "Error: [${err}]"
+        //def user = err.getCauses()[0].getUser()
+        //echo "User: [${user}]"
         didTimeout = true
         currentBuild.result = 'UNSTABLE'
-        if('SYSTEM' == user.toString()) { // SYSTEM means timeout.
+        //if('SYSTEM' == user.toString()) { // SYSTEM means timeout.
           didTimeout = true
-        } else {
+        //} else {
           userInput = false
           echo "Aborted by: [${user}]"
-        }
+        //}
       }
       echo "userInput [${userInput}]"
       echo "didTimeout [${didTimeout}]"
