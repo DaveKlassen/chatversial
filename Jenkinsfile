@@ -125,7 +125,7 @@ stage('Last') {
         userInput = input(
           id: 'DeployToProd',
           message: 'Would you like to deploy this to production?',
-          ok: 'Deploy',
+          ok: 'Vote',
           parameters: [
             [$class: 'ChoiceParameterDefinition', choices: 'Deploy\nAbort\nUndecided', name: 'Please indicate your decision.', description: 'Someone must approve production deployments']
           ]
