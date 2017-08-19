@@ -121,7 +121,7 @@ stage('Last') {
       def userInput = true
       def didTimeout = false
       try {
-        timeout(time: 120, unit: 'SECONDS') { // change to a convenient timeout for you
+        timeout(time: 20, unit: 'SECONDS') { // change to a convenient timeout for you
         userInput = input(
           id: 'DeployToProd',
           message: 'Would you like to deploy this to production?',
@@ -134,7 +134,8 @@ stage('Last') {
     } catch(err) { // timeout reached or input false
     def user = err.getCauses()[0].getUser()
     echo "User: [${user}]"
-    
+    didTimeout = true
+    currentBuild.result = 'UNSTABLE'
     if('SYSTEM' == user.toString()) { // SYSTEM means timeout.
     didTimeout = true
   } else {
