@@ -39,4 +39,4 @@ jobs:
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
       # run tests!
-      - run: gradle test
+      - run: ./mvnw test
